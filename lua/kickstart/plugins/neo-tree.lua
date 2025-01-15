@@ -16,21 +16,21 @@ return {
       function()
         require('neo-tree.command').execute { toggle = true, dir = vim.uv.cwd() }
       end,
-      desc = 'Explorer NeoTree (cwd)',
+      desc = 'NeoTree: [f]ile explorer',
     },
     {
       '<leader>eg',
       function()
         require('neo-tree.command').execute { source = 'git_status', toggle = true }
       end,
-      desc = 'Git Explorer',
+      desc = 'NeoTree: [g]it explorer',
     },
     {
       '<leader>eb',
       function()
         require('neo-tree.command').execute { source = 'buffers', toggle = true }
       end,
-      desc = 'Buffer Explorer',
+      desc = 'NeoTree: [b]uffer explorer',
     },
   },
   deactivate = function()
@@ -74,13 +74,13 @@ return {
             local path = node:get_id()
             vim.fn.setreg('+', path, 'c')
           end,
-          desc = 'Copy Path to Clipboard',
+          desc = 'copy_path_to_clipboard',
         },
         ['O'] = {
           function(state)
             require('lazy.util').open(state.tree:get_node().path, { system = true })
           end,
-          desc = 'Open with System Application',
+          desc = 'open_with_system_application',
         },
         ['P'] = { 'toggle_preview', config = { use_float = false } },
       },
@@ -91,12 +91,6 @@ return {
         expander_collapsed = '',
         expander_expanded = '',
         expander_highlight = 'NeoTreeExpander',
-      },
-      git_status = {
-        symbols = {
-          unstaged = '󰄱',
-          staged = '󰱒',
-        },
       },
     },
   },
