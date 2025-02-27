@@ -1,0 +1,6 @@
+[tools]
+eza = "latest"
+node = "latest"
+python = "latest"
+starship = "latest"
+zoxide = "latest"

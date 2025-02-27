@@ -34,9 +34,8 @@ export COLORTERM="truecolor"
 export MANPAGER='nvim +Man!'
 export MANWIDTH=999
 
-# asdf
-. "$HOME/.asdf/asdf.sh"
-. "$HOME/.asdf/completions/asdf.bash"
+# mise
+eval "$(~/.local/bin/mise activate bash)"
 
 eval "$(zoxide init bash)"
 eval "$(starship init bash)"
