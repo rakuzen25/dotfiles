@@ -10,6 +10,19 @@ return {
     opts = {},
   },
   {
+    'folke/lazydev.nvim',
+    ft = 'lua', -- only load on lua files
+    opts = {
+      library = {
+        -- See the configuration section for more details
+        -- Load luvit types when the `vim.uv` word is found
+        { path = '${3rd}/luv/library', words = { 'vim%.uv' } },
+        { path = 'snacks.nvim', words = { 'Snacks' } },
+        { path = 'lazy.nvim', words = { 'LazyVim' } },
+      },
+    },
+  },
+  {
     'rmagatti/auto-session',
     lazy = false,
 
@@ -20,6 +33,10 @@ return {
       suppressed_dirs = { '~/', '~/Projects', '~/Downloads', '/' },
       -- log_level = 'debug',
     },
+
+    init = function()
+      vim.o.sessionoptions = 'blank,buffers,curdir,folds,help,tabpages,winsize,winpos,terminal,localoptions'
+    end,
   },
   { 'numToStr/Comment.nvim', opts = {} },
   {
@@ -59,9 +76,6 @@ return {
         { 'nvim-lua/plenary.nvim' }, -- for curl, log wrapper
       },
       build = 'make tiktoken', -- Only on MacOS or Linux
-      opts = {
-        -- See Configuration section for options
-      },
       keys = {
         {
           '<leader>ccq',
@@ -111,6 +125,76 @@ return {
       table.insert(require('cmp').get_config().sources, { name = 'git' })
     end,
   },
+  {
+    'folke/noice.nvim',
+    event = 'VeryLazy',
+    opts = {
+      messages = { view = 'mini', view_warn = 'mini' },
+      cmdline = { view = 'cmdline' },
+      lsp = {
+        -- override markdown rendering so that **cmp** and other plugins use **Treesitter**
+        override = {
+          ['vim.lsp.util.convert_input_to_markdown_lines'] = true,
+          ['vim.lsp.util.stylize_markdown'] = true,
+          ['cmp.entry.get_documentation'] = true, -- requires hrsh7th/nvim-cmp
+        },
+      },
+      -- you can enable a preset for easier configuration
+      presets = {
+        bottom_search = true, -- use a classic bottom cmdline for search
+        command_palette = true, -- position the cmdline and popupmenu together
+        long_message_to_split = true, -- long messages will be sent to a split
+        inc_rename = true, -- enables an input dialog for inc-rename.nvim
+        lsp_doc_border = true, -- add a border to hover docs and signature help
+      },
+    },
+    dependencies = {
+      -- if you lazy-load any plugin below, make sure to add proper `module="..."` entries
+      'MunifTanjim/nui.nvim',
+      -- OPTIONAL:
+      --   `nvim-notify` is only needed, if you want to use the notification view.
+      --   If not available, we use `mini` as the fallback
+      'rcarriga/nvim-notify',
+    },
+  },
+  {
+    'folke/trouble.nvim',
+    opts = { auto_close = true },
+    cmd = 'Trouble',
+    keys = {
+      {
+        '<leader>xx',
+        '<cmd>Trouble diagnostics toggle<cr>',
+        desc = 'Diagnostics (Trouble)',
+      },
+      {
+        '<leader>q',
+        '<cmd>Trouble diagnostics toggle filter.buf=0<cr>',
+        desc = 'Buffer Diagnostics (Trouble)',
+      },
+      {
+        '<leader>cs',
+        '<cmd>Trouble symbols toggle focus=false<cr>',
+        desc = 'Symbols (Trouble)',
+      },
+      {
+        '<leader>cl',
+        '<cmd>Trouble lsp toggle focus=false win.position=right<cr>',
+        desc = 'LSP Definitions / references / ... (Trouble)',
+      },
+      {
+        '<leader>xL',
+        '<cmd>Trouble loclist toggle<cr>',
+        desc = 'Location List (Trouble)',
+      },
+      {
+        '<leader>xQ',
+        '<cmd>Trouble qflist toggle<cr>',
+        desc = 'Quickfix List (Trouble)',
+      },
+    },
+  },
+  { 'mistricky/codesnap.nvim', build = 'make', opts = { watermark = '', has_breadcrumbs = true } },
   {
     'akinsho/bufferline.nvim',
     dependencies = 'nvim-tree/nvim-web-devicons',
@@ -167,15 +251,5 @@ return {
         end,
       })
     end,
-  },
-  {
-    'amitds1997/remote-nvim.nvim',
-    version = '*', -- Pin to GitHub releases
-    dependencies = {
-      'nvim-lua/plenary.nvim', -- For standard functions
-      'MunifTanjim/nui.nvim', -- To build the plugin UI
-      'nvim-telescope/telescope.nvim', -- For picking b/w different remote methods
-    },
-    config = true,
   },
 }

@@ -93,6 +93,7 @@ return {
         expander_highlight = 'NeoTreeExpander',
       },
     },
+    auto_clean_after_session_restore = true,
   },
   config = function(_, opts)
     local function on_move(data)
