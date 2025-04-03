@@ -34,15 +34,6 @@ export COLORTERM="truecolor"
 export MANPAGER='nvim +Man!'
 export MANWIDTH=999
 
-# mise
-eval "$(~/.local/bin/mise activate bash)"
-
-eval "$(zoxide init bash)"
-eval "$(starship init bash)"
-eval "$(gh copilot alias -- bash)"
-
-source /usr/share/bash-completion/completions/git
-
 # Aliases
 alias ls="eza --icons -F -H --group-directories-first --git"
 alias cd=z
@@ -50,3 +41,13 @@ alias g=git
 alias v=nvim
 alias t=task
 alias m=make
+
+source /usr/share/bash-completion/completions/git
+
+# mise
+eval "$(~/.local/bin/mise activate bash)"
+
+eval "$(starship init bash)"
+eval "$(gh copilot alias -- bash)"
+eval "$(zoxide init bash)"
+
