@@ -1,5 +1,6 @@
 [tools]
 eza = "latest"
+gh = "latest"
 node = "latest"
 python = "latest"
 starship = "latest"
