@@ -194,7 +194,7 @@ return {
       },
     },
   },
-  { 'mistricky/codesnap.nvim', build = 'make', opts = { watermark = '', has_breadcrumbs = true } },
+  { 'mistricky/codesnap.nvim', opts = { watermark = '', has_breadcrumbs = true } },
   {
     'akinsho/bufferline.nvim',
     dependencies = 'nvim-tree/nvim-web-devicons',

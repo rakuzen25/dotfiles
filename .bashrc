@@ -26,7 +26,6 @@ fi
 
 unset rc
 
-export PATH="$PATH:/opt/nvim-linux64/bin:/opt/nvim/"
 export GPG_TTY=$(tty)
 export COLORTERM="truecolor"
 

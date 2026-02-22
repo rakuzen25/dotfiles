@@ -2,7 +2,6 @@
 eza = "latest"
 fd = "latest"
 lazygit = "latest"
-neovim = "latest"
 node = "latest"
 pnpm = "latest"
 python = "latest"
