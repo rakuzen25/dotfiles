@@ -1,7 +1,10 @@
 [tools]
 eza = "latest"
-gh = "latest"
+fd = "latest"
+lazygit = "latest"
+neovim = "latest"
 node = "latest"
+pnpm = "latest"
 python = "latest"
 starship = "latest"
 uv = "latest"
