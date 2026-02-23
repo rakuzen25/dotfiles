@@ -32,6 +32,7 @@ export COLORTERM="truecolor"
 # Set nvim as default man pager
 export MANPAGER='nvim +Man!'
 export MANWIDTH=999
+export EDITOR=nvim
 
 # Aliases
 alias ls="eza --icons -F -H --group-directories-first --git"
