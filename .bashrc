@@ -48,6 +48,5 @@ source /usr/share/bash-completion/completions/git
 eval "$(~/.local/bin/mise activate bash)"
 
 eval "$(starship init bash)"
-eval "$(gh copilot alias -- bash)"
 eval "$(zoxide init bash)"
 
