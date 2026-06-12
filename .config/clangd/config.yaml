@@ -1,0 +1,10 @@
+CompileFlags:                
+  Add: [-ferror-limit=0]
+  Remove: [
+    "-fipa-ra",
+    "-fno-ipa-ra",
+    "-fno-ipa-sra",
+    "-static-libasan",
+    "-static-libubsan",
+    "-fsanitize=bounds-strict"
+  ]
