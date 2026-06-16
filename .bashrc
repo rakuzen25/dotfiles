@@ -36,7 +36,6 @@ export EDITOR=nvim
 
 # Aliases
 alias ls="eza --icons -F -H --group-directories-first --git"
-alias cd=z
 alias g=git
 alias v=nvim
 alias t=task
@@ -49,5 +48,6 @@ eval "$(~/.local/bin/mise activate bash)"
 
 eval "$(starship init bash)"
 if [ "$CLAUDECODE" != "1" ]; then
+    alias cd=z
     eval "$(zoxide init bash)"
 fi
