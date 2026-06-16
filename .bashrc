@@ -6,9 +6,8 @@ if [ -f /etc/bashrc ]; then
 fi
 
 # User specific environment
-if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]
-then
-    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
+	PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 fi
 export PATH
 
@@ -29,25 +28,25 @@ unset rc
 export GPG_TTY=$(tty)
 export COLORTERM="truecolor"
 
-# Set nvim as default man pager
-export MANPAGER='nvim +Man!'
-export MANWIDTH=999
-export EDITOR=nvim
-
-# Aliases
-alias ls="eza --icons -F -H --group-directories-first --git"
-alias g=git
-alias v=nvim
-alias t=task
-alias m=make
-
-source /usr/share/bash-completion/completions/git
-
-# mise
-eval "$(~/.local/bin/mise activate bash)"
-
-eval "$(starship init bash)"
 if [ "$CLAUDECODE" != "1" ]; then
-    alias cd=z
-    eval "$(zoxide init bash)"
+	# Set nvim as default man pager
+	export MANPAGER='nvim +Man!'
+	export MANWIDTH=999
+	export EDITOR=nvim
+
+	# Aliases
+	alias ls="eza --icons -F -H --group-directories-first --git"
+	alias cd=z
+	alias g=git
+	alias v=nvim
+	alias t=task
+	alias m=make
+
+	source /usr/share/bash-completion/completions/git
+
+	# mise
+	eval "$(~/.local/bin/mise activate bash)"
+
+	eval "$(starship init bash)"
+	eval "$(zoxide init bash)"
 fi
