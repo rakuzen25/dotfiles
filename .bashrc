@@ -48,5 +48,6 @@ source /usr/share/bash-completion/completions/git
 eval "$(~/.local/bin/mise activate bash)"
 
 eval "$(starship init bash)"
-eval "$(zoxide init bash)"
-
+if [ "$CLAUDECODE" != "1" ]; then
+    eval "$(zoxide init bash)"
+fi
