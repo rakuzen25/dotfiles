@@ -41,6 +41,19 @@ if [ "$CLAUDECODE" != "1" ]; then
 	alias v=nvim
 	alias t=task
 	alias m=make
+	cchat() {
+		clear
+		(
+			cd "$HOME/.cchat" || return
+			local args=(--settings "$HOME/.cchat/.claude/settings.json"
+				--mcp-config "$HOME/.cchat/.claude/.mcp.json" --strict-mcp-config)
+			if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
+				claude -p "${args[@]}" "$*"
+			else
+				claude "${args[@]}" "$@"
+			fi
+		)
+	}
 
 	source /usr/share/bash-completion/completions/git
 

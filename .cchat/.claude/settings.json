@@ -1,0 +1,43 @@
+{
+    "permissions": {
+        "defaultMode": "default",
+        "allow": [
+            "Read(**)",
+            "Glob",
+            "Grep",
+            "mcp__optiver_web-search",
+            "Bash(uname:*)",
+            "Bash(hostname:*)",
+            "Bash(whoami:*)",
+            "Bash(id:*)",
+            "Bash(df:*)",
+            "Bash(du:*)",
+            "Bash(free:*)",
+            "Bash(uptime:*)",
+            "Bash(lscpu:*)",
+            "Bash(lsblk:*)",
+            "Bash(ip:*)",
+            "Bash(ps:*)",
+            "Bash(env:*)",
+            "Bash(printenv:*)",
+            "Bash(date:*)",
+            "Bash(ls:*)",
+            "Bash(git status)",
+            "Bash(git diff)",
+            "Bash(git log:*)"
+        ],
+        "deny": [
+            "Bash(rm *)",
+            "Bash(rm -rf *)",
+            "Bash(git push --force)",
+            "Bash(git reset *)",
+            "Bash(* rm *)",
+            "Write(*)",
+            "Edit"
+        ]
+    },
+    "model": "haiku",
+    "effortLevel": "low",
+    "includeCoAuthoredBy": false,
+    "enableAllProjectMcpServers": false
+}
