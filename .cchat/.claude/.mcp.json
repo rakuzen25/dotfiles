@@ -1,0 +1,8 @@
+{
+  "mcpServers": {
+    "optiver/web-search": {
+      "type": "http",
+      "url": "https://mcp-emea-prod.optiver.com/web-search/latest/mcp"
+    }
+  }
+}
