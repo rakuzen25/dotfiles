@@ -28,6 +28,22 @@ unset rc
 export GPG_TTY=$(tty)
 export COLORTERM="truecolor"
 
+clip() {
+	local data
+	if [ "$#" -gt 0 ]; then
+		data="$*"
+	else
+		data=$(cat)
+	fi
+	local encoded
+	encoded=$(printf '%s' "$data" | base64 | tr -d '\n')
+	if [ -n "$TMUX" ]; then
+		printf '\033Ptmux;\033\033]52;c;%s\a\033\\' "$encoded"
+	else
+		printf '\033]52;c;%s\a' "$encoded"
+	fi
+}
+
 if [ "$CLAUDECODE" != "1" ]; then
 	# Set nvim as default man pager
 	export MANPAGER='nvim +Man!'
