@@ -57,6 +57,14 @@ if [ "$CLAUDECODE" != "1" ]; then
 	alias v=nvim
 	alias t=task
 	alias m=make
+	HISTIGNORE="${HISTIGNORE:+$HISTIGNORE:}incog:incog *"
+	incog() {
+		if [ "$INCOGNITO" = "1" ]; then
+			echo "Already in incognito mode." >&2
+			return 1
+		fi
+		INCOGNITO=1 HISTFILE=/dev/null bash
+	}
 	cchat() {
 		(
 			cd "$HOME/.cchat" || return

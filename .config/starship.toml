@@ -1,5 +1,11 @@
 "$schema" = 'https://starship.rs/config-schema.json'
 
+[env_var.INCOGNITO]
+variable = "INCOGNITO"
+symbol = "󰗹 "
+style = "bold yellow"
+format = "[$symbol]($style) "
+
 [aws]
 symbol = "  "
 
