@@ -116,12 +116,12 @@ fi
 
 # Source global definitions
 if [ -f /etc/bashrc ]; then
-	. /etc/bashrc
+    . /etc/bashrc
 fi
 
 # User specific environment
 if ! [[ "$PATH" =~ "$HOME/.local/bin:$HOME/bin:" ]]; then
-	PATH="$HOME/.local/bin:$HOME/bin:$PATH"
+    PATH="$HOME/.local/bin:$HOME/bin:$PATH"
 fi
 export PATH
 
@@ -130,11 +130,11 @@ export PATH
 
 # User specific aliases and functions
 if [ -d ~/.bashrc.d ]; then
-	for rc in ~/.bashrc.d/*; do
-		if [ -f "$rc" ]; then
-			. "$rc"
-		fi
-	done
+    for rc in ~/.bashrc.d/*; do
+        if [ -f "$rc" ]; then
+            . "$rc"
+        fi
+    done
 fi
 unset rc
 
@@ -142,19 +142,19 @@ export GPG_TTY=$(tty)
 export COLORTERM="truecolor"
 
 clip() {
-	local data
-	if [ "$#" -gt 0 ]; then
-		data="$*"
-	else
-		data=$(cat)
-	fi
-	local encoded
-	encoded=$(printf '%s' "$data" | base64 | tr -d '\n')
-	if [ -n "$TMUX" ]; then
-		printf '\033Ptmux;\033\033]52;c;%s\a\033\\' "$encoded"
-	else
-		printf '\033]52;c;%s\a' "$encoded"
-	fi
+    local data
+    if [ "$#" -gt 0 ]; then
+        data="$*"
+    else
+        data=$(cat)
+    fi
+    local encoded
+    encoded=$(printf '%s' "$data" | base64 | tr -d '\n')
+    if [ -n "$TMUX" ]; then
+        printf '\033Ptmux;\033\033]52;c;%s\a\033\\' "$encoded"
+    else
+        printf '\033]52;c;%s\a' "$encoded"
+    fi
 }
 
 # Set nvim as default man pager
@@ -171,24 +171,24 @@ alias t=task
 alias m=make
 HISTIGNORE="${HISTIGNORE:+$HISTIGNORE:}incog:incog *"
 incog() {
-	if [ "$INCOGNITO" = "1" ]; then
-		echo "Already in incognito mode." >&2
-		return 1
-	fi
-	INCOGNITO=1 HISTFILE=/dev/null bash
+    if [ "$INCOGNITO" = "1" ]; then
+        echo "Already in incognito mode." >&2
+        return 1
+    fi
+    INCOGNITO=1 HISTFILE=/dev/null bash
 }
 cchat() {
-	(
-		cd "$HOME/.cchat" || return
-		local args=(--settings "$HOME/.cchat/.claude/settings.json"
-			--mcp-config "$HOME/.cchat/.claude/.mcp.json" --strict-mcp-config)
-		clear
-		if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
-			exec claude -p "${args[@]}" "$*"
-		else
-			exec claude "${args[@]}" "$@"
-		fi
-	)
+    (
+        cd "$HOME/.cchat" || return
+        local args=(--settings "$HOME/.cchat/.claude/settings.json"
+            --mcp-config "$HOME/.cchat/.claude/.mcp.json" --strict-mcp-config)
+        clear
+        if [ "$#" -gt 0 ] && [ "${1#-}" = "$1" ]; then
+            exec claude -p "${args[@]}" "$*"
+        else
+            exec claude "${args[@]}" "$@"
+        fi
+    )
 }
 
 source /usr/share/bash-completion/completions/git
