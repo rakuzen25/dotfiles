@@ -1,11 +1,16 @@
 [tools]
 eza = "latest"
 fd = "latest"
+gh = "latest"
 lazygit = "latest"
+lua = "5.1"
+neovim = "latest"
 node = "latest"
 pnpm = "latest"
 python = "latest"
+rg = "latest"
 starship = "latest"
+tmux = "latest"
 uv = "latest"
 zoxide = "latest"
 
