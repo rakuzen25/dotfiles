@@ -8,3 +8,6 @@ python = "latest"
 starship = "latest"
 uv = "latest"
 zoxide = "latest"
+
+[settings]
+auto_update = true
