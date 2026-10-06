@@ -161,6 +161,7 @@ clip() {
 export MANPAGER='nvim +Man!'
 export MANWIDTH=999
 export EDITOR=nvim
+export SYSTEMD_EDITOR=nvim
 
 # Aliases
 alias ls="eza --icons -F -H --group-directories-first --git"
