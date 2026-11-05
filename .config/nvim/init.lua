@@ -93,6 +93,16 @@ vim.g.maplocalleader = ' '
 -- Set to true if you have a Nerd Font installed and selected in the terminal
 vim.g.have_nerd_font = true
 
+-- Recognize Compose files so the Docker language server can attach.
+vim.filetype.add {
+  filename = {
+    ['compose.yaml'] = 'yaml.docker-compose',
+    ['compose.yml'] = 'yaml.docker-compose',
+    ['docker-compose.yaml'] = 'yaml.docker-compose',
+    ['docker-compose.yml'] = 'yaml.docker-compose',
+  },
+}
+
 -- [[ Setting options ]]
 -- See `:help vim.opt`
 -- NOTE: You can change these options as you wish!
@@ -110,13 +120,35 @@ vim.opt.mouse = 'a'
 -- Don't show the mode, since it's already in the status line
 vim.opt.showmode = false
 
--- Sync clipboard between OS and Neovim.
---  Schedule the setting after `UiEnter` because it can increase startup-time.
---  Remove this option if you want your OS clipboard to remain independent.
---  See `:help 'clipboard'`
--- vim.schedule(function()
--- vim.opt.clipboard = 'unnamedplus'
--- end)
+-- Sync yanks with the system clipboard; fall back to OSC 52 in terminals.
+local has_desktop_clipboard = (vim.env.WAYLAND_DISPLAY and vim.fn.executable 'wl-copy' == 1 and vim.fn.executable 'wl-paste' == 1)
+  or (vim.env.DISPLAY and (vim.fn.executable 'xclip' == 1 or vim.fn.executable 'xsel' == 1))
+  or (vim.fn.has 'mac' == 1 and vim.fn.executable 'pbcopy' == 1)
+  or vim.fn.has 'win32' == 1
+if not has_desktop_clipboard then
+  local clipboard = { {}, 'v' }
+  local function copy(register)
+    local send = require('vim.ui.clipboard.osc52').copy(register)
+    return function(lines, regtype)
+      clipboard = { vim.deepcopy(lines), regtype }
+      send(lines, regtype)
+    end
+  end
+  vim.g.clipboard = {
+    name = 'OSC 52 fallback',
+    copy = { ['+'] = copy '+', ['*'] = copy '*' },
+    -- Keep Neovim paste local; use terminal paste for external clipboard text.
+    paste = {
+      ['+'] = function()
+        return clipboard
+      end,
+      ['*'] = function()
+        return clipboard
+      end,
+    },
+  }
+end
+vim.opt.clipboard = 'unnamedplus'
 
 -- Enable break indent
 vim.opt.breakindent = true
@@ -351,7 +383,7 @@ require('lazy').setup({
   { -- Fuzzy Finder (files, lsp, etc)
     'nvim-telescope/telescope.nvim',
     event = 'VimEnter',
-    branch = '0.1.x',
+    branch = 'master',
     dependencies = {
       'nvim-lua/plenary.nvim',
       { -- If encountering errors, see telescope-fzf-native README for installation instructions
@@ -455,25 +487,12 @@ require('lazy').setup({
 
   -- LSP Plugins
   {
-    -- `lazydev` configures Lua LSP for your Neovim config, runtime and plugins
-    -- used for completion, annotations and signatures of Neovim apis
-    'folke/lazydev.nvim',
-    ft = 'lua',
-    opts = {
-      library = {
-        -- Load luvit types when the `vim.uv` word is found
-        { path = 'luvit-meta/library', words = { 'vim%.uv' } },
-      },
-    },
-  },
-  { 'Bilal2453/luvit-meta', lazy = true },
-  {
     -- Main LSP Configuration
     'neovim/nvim-lspconfig',
     dependencies = {
       -- Automatically install LSPs and related tools to stdpath for Neovim
-      { 'williamboman/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
-      'williamboman/mason-lspconfig.nvim',
+      { 'mason-org/mason.nvim', config = true }, -- NOTE: Must be loaded before dependants
+      'mason-org/mason-lspconfig.nvim',
       'WhoIsSethDaniel/mason-tool-installer.nvim',
 
       -- Useful status updates for LSP.
@@ -569,7 +588,7 @@ require('lazy').setup({
           --
           -- When you move your cursor, the highlights will be cleared (the second autocommand).
           local client = vim.lsp.get_client_by_id(event.data.client_id)
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_documentHighlight) then
             local highlight_augroup = vim.api.nvim_create_augroup('kickstart-lsp-highlight', { clear = false })
             vim.api.nvim_create_autocmd({ 'CursorHold', 'CursorHoldI' }, {
               buffer = event.buf,
@@ -596,7 +615,7 @@ require('lazy').setup({
           -- code, if the language server you are using supports them
           --
           -- This may be unwanted, since they displace some of your code
-          if client and client.supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
+          if client and client:supports_method(vim.lsp.protocol.Methods.textDocument_inlayHint) then
             map('<leader>th', function()
               vim.lsp.inlay_hint.enable(not vim.lsp.inlay_hint.is_enabled { bufnr = event.buf })
             end, '[T]oggle Inlay [H]ints')
@@ -631,6 +650,10 @@ require('lazy').setup({
       --  - settings (table): Override the default settings passed when initializing the server.
       --        For example, to see the options for `lua_ls`, you could go to: https://luals.github.io/wiki/settings/
       local servers = {
+        ts_ls = {},
+        html = {},
+        cssls = {},
+        docker_language_server = {},
         -- clangd = {},
         -- gopls = {},
         -- pyright = {},
@@ -645,8 +668,12 @@ require('lazy').setup({
         --
 
         pylsp = {
-          plugins = {
-            pylsp_mypy = { enabled = true },
+          settings = {
+            pylsp = {
+              plugins = {
+                pylsp_mypy = { enabled = true },
+              },
+            },
           },
         },
 
@@ -689,20 +716,21 @@ require('lazy').setup({
       local ensure_installed = vim.tbl_keys(servers or {})
       vim.list_extend(ensure_installed, {
         'stylua', -- Used to format Lua code
+        'prettierd',
+        'prettier',
+        'ruff',
+        'dockerfmt',
+        'eslint_d',
       })
       require('mason-tool-installer').setup { ensure_installed = ensure_installed }
 
+      for name, server in pairs(servers) do
+        server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
+        vim.lsp.config(name, server)
+      end
+
       require('mason-lspconfig').setup {
-        handlers = {
-          function(server_name)
-            local server = servers[server_name] or {}
-            -- This handles overriding only values explicitly passed
-            -- by the server configuration above. Useful when disabling
-            -- certain features of an LSP (for example, turning off formatting for ts_ls)
-            server.capabilities = vim.tbl_deep_extend('force', {}, capabilities, server.capabilities or {})
-            require('lspconfig')[server_name].setup(server)
-          end,
-        },
+        automatic_enable = vim.tbl_keys(servers),
       }
     end,
   },
@@ -747,6 +775,55 @@ require('lazy').setup({
         --
         -- You can use 'stop_after_first' to run the first available formatter from the list
         -- javascript = { "prettierd", "prettier", stop_after_first = true },
+        javascript = { 'eslint_d', 'prettier' },
+        typescript = { 'eslint_d', 'prettier' },
+        javascriptreact = { 'eslint_d', 'prettier' },
+        typescriptreact = { 'eslint_d', 'prettier' },
+        json = { 'prettier' },
+        jsonc = { 'prettier' },
+        yaml = { 'prettier' },
+        markdown = { 'prettier' },
+        scss = { 'prettier' },
+        less = { 'prettier' },
+        html = { 'prettier' },
+        css = { 'prettier' },
+        dockerfile = { 'dockerfmt' },
+      },
+      formatters = {
+        eslint_d = {
+          -- Only apply ESLint fixes in projects with a flat config.
+          condition = function(_, ctx)
+            return vim.fs.root(ctx.filename, {
+              'eslint.config.js',
+              'eslint.config.mjs',
+              'eslint.config.cjs',
+              'eslint.config.ts',
+              'eslint.config.mts',
+              'eslint.config.cts',
+            }) ~= nil
+          end,
+        },
+        prettier = function(bufnr)
+          local filename = vim.api.nvim_buf_get_name(bufnr)
+          local ctx = { filename = filename, dirname = vim.fs.dirname(filename) }
+          -- Use the daemon when Prettier can discover a config normally.
+          if require('conform.formatters.prettierd').cwd(nil, ctx) then
+            return { inherit = 'prettierd' }
+          end
+          -- The CLI applies shared overrides against the actual input filename.
+          return {
+            prepend_args = { '--config', vim.fn.expand '~/.config/prettier/.prettierrc.json' },
+          }
+        end,
+        dockerfmt = {
+          command = vim.fn.stdpath 'data' .. '/mason/bin/dockerfmt',
+          condition = function(_, ctx)
+            -- dockerfmt prints help for empty input instead of formatted content.
+            return vim.api.nvim_buf_call(ctx.buf, function()
+              return vim.fn.nextnonblank(1) ~= 0
+            end)
+          end,
+        },
       },
     },
   },
@@ -874,7 +951,7 @@ require('lazy').setup({
             -- set group index to 0 to skip loading LuaLS completions as lazydev recommends it
             group_index = 0,
           },
-          { name = 'copilot' },
+          { name = 'git' },
           { name = 'nvim_lsp' },
           { name = 'luasnip' },
           { name = 'path' },
@@ -953,34 +1030,85 @@ require('lazy').setup({
       --  Check out: https://github.com/echasnovski/mini.nvim
     end,
   },
-  { -- Highlight, edit, and navigate code
+  {
     'nvim-treesitter/nvim-treesitter',
-    branch = 'master',
-    pin = true,
+    branch = 'main',
+    lazy = false,
     build = ':TSUpdate',
-    main = 'nvim-treesitter.configs', -- Sets main module to use for opts
-    -- [[ Configure Treesitter ]] See `:help nvim-treesitter`
-    opts = {
-      ensure_installed = { 'bash', 'c', 'diff', 'html', 'lua', 'luadoc', 'markdown', 'markdown_inline', 'query', 'vim', 'vimdoc' },
-      -- Autoinstall languages that are not installed
-      auto_install = true,
-      highlight = {
-        enable = true,
-        -- Some languages depend on vim's regex highlighting system (such as Ruby) for indent rules.
-        --  If you are experiencing weird indenting issues, add the language to
-        --  the list of additional_vim_regex_highlighting and disabled languages for indent.
-        additional_vim_regex_highlighting = { 'ruby' },
-      },
-      indent = { enable = true, disable = { 'ruby' } },
-    },
-    -- There are additional nvim-treesitter modules that you can use to interact
-    -- with nvim-treesitter. You should go explore a few and see what interests you:
-    --
-    --    - Incremental selection: Included, see `:help nvim-treesitter-incremental-selection-mod`
-    --    - Show your current context: https://github.com/nvim-treesitter/nvim-treesitter-context
-    --    - Treesitter + textobjects: https://github.com/nvim-treesitter/nvim-treesitter-textobjects
-  },
 
+    config = function()
+      local ts = require 'nvim-treesitter'
+
+      ts.setup {
+        install_dir = vim.fn.stdpath 'data' .. '/site',
+      }
+
+      ts.install {
+        'bash',
+        'c',
+        'diff',
+        'html',
+        'javascript', -- Embedded <script> blocks in HTML
+        'css', -- Embedded <style> blocks in HTML
+        'lua',
+        'luadoc',
+        'markdown',
+        'markdown_inline',
+        'query',
+        'vim',
+        'vimdoc',
+      }
+
+      local available = {}
+      for _, lang in ipairs(ts.get_available()) do
+        available[lang] = true
+      end
+
+      local function enable(buf)
+        if not vim.api.nvim_buf_is_valid(buf) then
+          return
+        end
+
+        local ft = vim.bo[buf].filetype
+        local lang = vim.treesitter.language.get_lang(ft)
+        if not lang then
+          return
+        end
+
+        -- Missing parsers or highlight queries should not break FileType.
+        if not pcall(vim.treesitter.start, buf, lang) then
+          return
+        end
+
+        if ft == 'ruby' then
+          vim.bo[buf].syntax = 'ruby'
+        else
+          vim.bo[buf].indentexpr = "v:lua.require'nvim-treesitter'.indentexpr()"
+        end
+      end
+
+      vim.api.nvim_create_autocmd('FileType', {
+        group = vim.api.nvim_create_augroup('TreesitterSetup', { clear = true }),
+        callback = function(args)
+          local buf = args.buf
+          local lang = vim.treesitter.language.get_lang(vim.bo[buf].filetype)
+
+          enable(buf)
+
+          -- Replacement for the old auto_install option.
+          if lang and available[lang] then
+            ts.install({ lang }):await(function(err)
+              if not err then
+                vim.schedule(function()
+                  enable(buf)
+                end)
+              end
+            end)
+          end
+        end,
+      })
+    end,
+  },
   -- The following comments only work if you have downloaded the kickstart repo, not just copy pasted the
   -- init.lua. If you want these files, they are in the repository, so you can just download them and
   -- place them in the correct locations.

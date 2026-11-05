@@ -82,7 +82,7 @@ return {
           function()
             local input = vim.fn.input 'Quick Chat: '
             if input ~= '' then
-              require('CopilotChat').ask(input, { selection = require('CopilotChat.select').buffer })
+              require('CopilotChat').ask('#buffer ' .. input)
             end
           end,
           desc = 'CopilotChat: [q]uick chat',
@@ -90,8 +90,7 @@ return {
         {
           '<leader>ccp',
           function()
-            local actions = require 'CopilotChat.actions'
-            require('CopilotChat.integrations.telescope').pick(actions.prompt_actions())
+            require('CopilotChat').select_prompt()
           end,
           desc = 'CopilotChat: [p]rompt actions',
         },
@@ -108,7 +107,7 @@ return {
   { 'akinsho/toggleterm.nvim', version = '*', opts = { open_mapping = [[<c-\>]] } },
   {
     'pwntester/octo.nvim',
-    requires = {
+    dependencies = {
       'nvim-lua/plenary.nvim',
       'nvim-telescope/telescope.nvim',
       'nvim-tree/nvim-web-devicons',
@@ -121,9 +120,6 @@ return {
     opts = {
       -- options go here
     },
-    init = function()
-      table.insert(require('cmp').get_config().sources, { name = 'git' })
-    end,
   },
   {
     'folke/noice.nvim',
