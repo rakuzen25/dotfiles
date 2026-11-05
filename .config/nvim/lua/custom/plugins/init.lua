@@ -194,7 +194,6 @@ return {
       },
     },
   },
-  { 'mistricky/codesnap.nvim', opts = { watermark = '', has_breadcrumbs = true } },
   {
     'akinsho/bufferline.nvim',
     dependencies = 'nvim-tree/nvim-web-devicons',
